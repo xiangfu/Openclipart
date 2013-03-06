@@ -10,16 +10,28 @@
         android:layout_height="wrap_content"
         android:text="@string/hello_world" />
 
-    <ImageView 
+    <ImageView
         android:id="@+id/imageView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/textView1" />
-    
-    <ListView 
+
+    <ListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/imageView1"/>
+        android:layout_above="@+id/about"
+        android:layout_below="@id/imageView1"
+        android:divider="@drawable/line" />
+
+    <TextView
+        android:id="@+id/about"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="5dp"
+        android:background="#000000"
+        android:textColor="#ffffff"
+        android:textStyle="bold" />
 
 </RelativeLayout>

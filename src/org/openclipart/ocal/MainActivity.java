@@ -1,5 +1,5 @@
 
-package org.openclipart.anopenclipart;
+package org.openclipart.ocal;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -15,65 +15,96 @@ import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
 import org.mcsoxford.rss.RSSReaderException;
+import org.openclipart.ocal.R;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnItemClickListener {
-    private static final String TAG = "AnOpenclipart";
+    private static final String TAG = "OCAL";
 
-    private static final String API_URL = "http://openclipart.org/api/search/?query=water&page=4";
+    private static final String OCAL_URL = "http://openclipart.org";
+
+    private static final String API_URL = OCAL_URL + "/api/search/?query=water&page=4";
 
     private ArrayList<HashMap<String, Object>> listItem;
 
     private ImageView imageView1;
+
+    private TextView aboutTxt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageView1 = (ImageView)findViewById(R.id.imageView1);
-        
+        if(android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll()
+                    .build();
+            StrictMode.setThreadPolicy(policy);
+        }
+
+        aboutTxt = (TextView) findViewById(R.id.about);
+        Spanned text = Html
+                .fromHtml("<p><b>OCAL:</b></p>" + "<p>" + getString(R.string.app_desc) + "</p>"
+                        + "<p> by <a href=\"http://www.openclipart.org\">openclipart.org</a> </p>");
+        aboutTxt.setText(text);
+        aboutTxt.setMovementMethod(LinkMovementMethod.getInstance());
+        aboutTxt.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                invokeBrowse();
+            }
+        });
+
+        imageView1 = (ImageView) findViewById(R.id.imageView1);
+
         RSSReader reader = new RSSReader();
         String uri = API_URL;
 
         listItem = new ArrayList<HashMap<String, Object>>();
         try {
-            // 这是最核心的方法，reader.load会解析url上面的xml文件
+            // use reader.load to parse xml file.
             RSSFeed feed = reader.load(uri);
             TextView tv = (TextView) findViewById(R.id.textView1);
             tv.setText(feed.getDescription());
             Integer it = feed.getItems().size();
-            // 将所有的解析到的数据加入到listItem中
+
             for(int i = 0; i < it; i++) {
                 RSSItem item = feed.getItems().get(i);
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 map.put("itemtitle", item);
-                map.put("itemcontent", item.getDescription());
+                map.put("itemcontent", "Desc:\n" + item.getDescription());
                 // map.put("itemcontent", "");
                 listItem.add(map);
             }
         } catch (RSSReaderException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+            reader.close();
         }
         ListView lv = (ListView) findViewById(R.id.listView1);
-        // 构造一个Adapter
+
         SimpleAdapter listItemAdapter = new SimpleAdapter(this, listItem, R.layout.item,
                 new String[] {
                         "itemtitle", "itemcontent"
@@ -82,13 +113,14 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 });
         lv.setAdapter(listItemAdapter);
         lv.setOnItemClickListener(this);
+        reader.close();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
+        return false;
     }
 
     @Override
@@ -96,12 +128,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
         // TODO Auto-generated method stub
         RSSItem item = (RSSItem) listItem.get(position).get("itemtitle");
         List<MediaThumbnail> thumbnails = item.getThumbnails();
-        Log.d(TAG, "title = " + item.getTitle()
-                + ", url = " + item.getLink().toString()
-                + ", thumbnails.size = " + thumbnails.size()
-                + ", category = " + item.getCategories().size());
-        
-        if(thumbnails.size()>0) {
+        Log.d(TAG, "title = " + item.getTitle() + ", url = " + item.getLink().toString()
+                + ", thumbnails.size = " + thumbnails.size() + ", category = "
+                + item.getCategories().size());
+
+        if(thumbnails.size() > 0) {
             MediaThumbnail thumbnail = thumbnails.get(0);
             if(thumbnails != null) {
                 Uri uri = thumbnail.getUrl();
@@ -110,7 +141,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
             }
         }
     }
-    
+
     public Bitmap getHttpBitmap(final String url) {
         URL myFileUrl = null;
         Bitmap bitmap = null;
@@ -121,17 +152,15 @@ public class MainActivity extends Activity implements OnItemClickListener {
             e.printStackTrace();
         }
         try {
-            HttpURLConnection conn = (HttpURLConnection) myFileUrl
-                .openConnection();
+            HttpURLConnection conn = (HttpURLConnection) myFileUrl.openConnection();
             conn.setConnectTimeout(0);
             conn.setDoInput(true);
             conn.connect();
             BufferedInputStream is = new BufferedInputStream(conn.getInputStream());
-//            BitmapFactory.Options op = new BitmapFactory.Options();
-//            op.inSampleSize = 8;
-//            bitmap = BitmapFactory.decodeStream(is, null, op);
-            
-            
+            // BitmapFactory.Options op = new BitmapFactory.Options();
+            // op.inSampleSize = 8;
+            // bitmap = BitmapFactory.decodeStream(is, null, op);
+
             bitmap = BitmapFactory.decodeStream(is);
             is.close();
         } catch (IOException e) {
@@ -140,17 +169,15 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
             HttpURLConnection conn;
             try {
-                conn = (HttpURLConnection) myFileUrl
-                                          .openConnection();
+                conn = (HttpURLConnection) myFileUrl.openConnection();
                 conn.setConnectTimeout(0);
                 conn.setDoInput(true);
                 conn.connect();
                 BufferedInputStream is = new BufferedInputStream(conn.getInputStream());
-//                BitmapFactory.Options op = new BitmapFactory.Options();
-//                op.inSampleSize = 8;
-//                bitmap = BitmapFactory.decodeStream(is, null, op);
-                
-                
+                // BitmapFactory.Options op = new BitmapFactory.Options();
+                // op.inSampleSize = 8;
+                // bitmap = BitmapFactory.decodeStream(is, null, op);
+
                 bitmap = BitmapFactory.decodeStream(is);
                 is.close();
             } catch (IOException e1) {
@@ -158,5 +185,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
             }
         }
         return bitmap;
+    }
+
+    public void invokeBrowse() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(OCAL_URL));
+        startActivity(intent);
     }
 }
