@@ -1,5 +1,5 @@
 
-package org.openclipart.ocal;
+package org.openclipart.app;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSReader;
 import org.mcsoxford.rss.RSSReaderException;
-import org.openclipart.ocal.R;
+import org.openclipart.app.R;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,11 +39,11 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnItemClickListener {
-    private static final String TAG = "OCAL";
+    private static final String TAG = "Openclipart";
 
-    private static final String OCAL_URL = "http://openclipart.org";
+    private static final String Openclipart_URL = "http://openclipart.org";
 
-    private static final String API_URL = OCAL_URL + "/api/search/?query=water&page=4";
+    private static final String API_URL = Openclipart_URL + "/api/search/?query=water&page=4";
 
     private ArrayList<HashMap<String, Object>> listItem;
 
@@ -64,8 +64,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
         aboutTxt = (TextView) findViewById(R.id.about);
         Spanned text = Html
-                .fromHtml("<p><b>OCAL:</b></p>" + "<p>" + getString(R.string.app_desc) + "</p>"
-                        + "<p> by <a href=\"http://www.openclipart.org\">openclipart.org</a> </p>");
+                .fromHtml("<b>Openclipart:</b> by <a href=\"http://www.openclipart.org\">openclipart.org</a>");
         aboutTxt.setText(text);
         aboutTxt.setMovementMethod(LinkMovementMethod.getInstance());
         aboutTxt.setOnClickListener(new View.OnClickListener() {
@@ -189,7 +188,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     public void invokeBrowse() {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(OCAL_URL));
+        intent.setData(Uri.parse(Openclipart_URL));
         startActivity(intent);
     }
 }

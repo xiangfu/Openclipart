@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">OCAL</string>
+    <string name="app_name">Openclipart</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">About</string>
-    <string name="app_desc">Android App for the Open Clip Art Library</string>
+    <string name="app_desc">Openclipart by openclipart.org</string>
 
 </resources>
